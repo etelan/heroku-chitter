@@ -1,0 +1,5 @@
+/**/.DS_Store
+
+# Local cache of Rubocop remote config
+.rubocop-*
+db/heroku_seeds.rb
