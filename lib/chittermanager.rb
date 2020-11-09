@@ -17,23 +17,26 @@ class ChitterManager
         end
     end
 
-    def self.add(content, author)
+    def self.add(content, author, yt)
 
         # Grab the time
         time = Time.new
         current_time = "#{time.hour} : #{time.min} , Day  #{time.day}  of  #{time.strftime('%B')}"
-  
-        # If it's a video, the sub it out for a frame.
-        if self.youtube?(content)
-  
-            selector = find_between("http", " ", content) #s://www.youtube.com/watch?v=JEGjlELJxC8&ab_channel=FarrahBeattie
-  
-            content = content.gsub("http"){""} #s://www.youtube.com/watch?v=JEGjlELJxC8&ab_channel=FarrahBeattie
-            content = content.gsub(selector){self.embed_youtube(content)} 
+        
+        # Content Error Fixing
+        content = self.message_fixer(content)
+
+        if yt # Attempt embed
+            # If it's a video, the sub it out for a frame.
+            if self.youtube?(content)
+
+                selector = find_between("http", " ", content) #s://www.youtube.com/watch?v=JEGjlELJxC8&ab_channel=FarrahBeattie
+    
+                content = content.gsub("http"){""} #s://www.youtube.com/watch?v=JEGjlELJxC8&ab_channel=FarrahBeattie
+                content = content.gsub(selector){self.embed_youtube(content)} 
+            end
         end
   
-        # Double stuff the quotes so it don't break
-        content = content.gsub("'"){"''"}
         
         # Prepare and send the SQL
         prepared_string = "insert into peeps (message, author, date) VALUES ('#{content}', '#{author}', '#{current_time}') RETURNING id, message, author, date;"
@@ -43,6 +46,17 @@ class ChitterManager
     
     def self.youtube?(content)
         content.include? "youtube"
+    end
+
+    def self.message_fixer(content)
+        # Double stuff the quotes so it don't break
+        content = content.gsub("'"){"''"}
+
+        # Fix Youtube Errors
+        if self.youtube?(content) then content = content.insert(-1, ' ') end
+
+        # Return
+        return content
     end
 
     def self.embed_youtube(content)

@@ -11,6 +11,8 @@ class DatabaseQuery
       user: uri.user,
       password: uri.password
     })
+
+    # @@connection = PG.connect(dbname: 'chitter_test')
   end
 
   def self.query(sql)
